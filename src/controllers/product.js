@@ -1,70 +1,80 @@
-const { product, user, category, productCategory } = require("../../models");
+const { product, user, category, productCategory } = require('../../models');
 
 exports.getProduct = async (req, res) => {
   try {
-    const data = await product.findAll({
+    let data = await product.findAll({
       include: [
         {
           model: user,
-          as: "user",
+          as: 'user',
           attributes: {
-            exclude: ["createdAt", "updatedAt", "password"],
+            exclude: ['createdAt', 'updatedAt', 'password'],
           },
         },
         {
           model: category,
-          as: "categories",
+          as: 'categories',
           through: {
             model: productCategory,
-            as: "bridge",
+            as: 'bridge',
             attributes: [],
           },
           attributes: {
-            exclude: ["createdAt", "updatedAt"],
+            exclude: ['createdAt', 'updatedAt'],
           },
         },
       ],
       attributes: {
-        exclude: ["createdAt", "updatedAt", "idUser"],
+        exclude: ['createdAt', 'updatedAt', 'idUser'],
       },
     });
 
+    data = data.map((item) => {
+      item.image = process.env.PATH_FILE + item.image;
+      return item;
+    });
+
     res.send({
-      status: "success...",
+      status: 'success...',
       data,
     });
   } catch (error) {
     console.log(error);
     res.send({
-      status: "failed",
-      message: "Server Error",
+      status: 'failed',
+      message: 'Server Error',
     });
   }
 };
 
 exports.addProduct = async (req, res) => {
   try {
-    const { category: categoryName, ...data } = req.body;
-    
-    // code here
-    const categoryData = await category.findOne({
-      where: {
-        name: categoryName,
-      },
-    });
+    const data = req.body;
 
-    if (categoryData) {
-      await productCategory.create({
-        idCategory: categoryData.id,
-        idProduct: newProduct.id,
-      });
-    } else {
-      const newCategory = await category.create({ name: categoryName });
-      await productCategory.create({
-        idCategory: newCategory.id,
-        idProduct: newProduct.id,
-      });
-    }
+    data.image = req.file.filename;
+    data.idUser = req.user.id;
+
+    const newProduct = await product.create(data);
+
+    // // code here
+    // const categoryData = await category.findOne({
+    //   where: {
+    //     name: categoryName,
+    //   },
+    // });
+
+    // if (categoryData) {
+    //   await productCategory.create({
+    //     idCategory: categoryData.id,
+    //     idProduct: newProduct.id,
+    //   });
+    // } else {
+    //   const newCategory = await category.create({ name: categoryName });
+    //   await productCategory.create({
+    //     idCategory: newCategory.id,
+    //     idProduct: newProduct.id,
+    //   });
+    // }
     let productData = await product.findOne({
       where: {
         id: newProduct.id,
@@ -72,35 +82,38 @@ exports.addProduct = async (req, res) => {
       include: [
         {
           model: user,
-          as: "user",
+          as: 'user',
           attributes: {
-            exclude: ["createdAt", "updatedAt", "password"],
+            exclude: ['createdAt', 'updatedAt', 'password'],
           },
         },
         {
           model: category,
-          as: "categories",
+          as: 'categories',
           through: {
             model: productCategory,
-            as: "bridge",
+            as: 'bridge',
             attributes: [],
           },
           attributes: {
-            exclude: ["createdAt", "updatedAt"],
+            exclude: ['createdAt', 'updatedAt'],
           },
         },
       ],
       attributes: {
-        exclude: ["createdAt", "updatedAt", "idUser"],
+        exclude: ['createdAt', 'updatedAt', 'idUser'],
       },
     });
-    
-    // code here
+
+    res.send({
+      status: 'success',
+      productData,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      status: "failed",
-      message: "Server Error",
+      status: 'failed',
+      message: 'Server Error',
     });
   }
 };

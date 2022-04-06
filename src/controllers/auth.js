@@ -1,12 +1,12 @@
 // import model
-const { user } = require("../../models");
+const { user } = require('../../models');
 
 // import joi validation
-const Joi = require("joi");
+const Joi = require('joi');
 // import bcrypt
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
 //import jsonwebtoken
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   // our validation schema here
@@ -41,20 +41,20 @@ exports.register = async (req, res) => {
 
     // generate token
     const token = jwt.sign({ id: user.id }, process.env.TOKEN_KEY);
-    
+
     res.status(200).send({
-      status: "success...",
+      status: 'success...',
       data: {
         name: newUser.name,
         email: newUser.email,
-        token
+        token,
       },
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      status: "failed",
-      message: "Server Error",
+      status: 'failed',
+      message: 'Server Error',
     });
   }
 };
@@ -83,7 +83,7 @@ exports.login = async (req, res) => {
         email: req.body.email,
       },
       attributes: {
-        exclude: ["createdAt", "updatedAt"],
+        exclude: ['createdAt', 'updatedAt'],
       },
     });
     // compare password between entered from client and from database
@@ -92,8 +92,8 @@ exports.login = async (req, res) => {
     // check if not valid then return response with status 400 (bad request)
     if (!isValid) {
       return res.status(400).send({
-        status: "failed",
-        message: "credential is invalid",
+        status: 'failed',
+        message: 'credential is invalid',
       });
     }
 
@@ -101,18 +101,18 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ id: userExist.id }, process.env.TOKEN_KEY);
 
     res.status(200).send({
-      status: "success...",
+      status: 'success...',
       data: {
         name: userExist.name,
         email: userExist.email,
-        token
+        token,
       },
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
-      status: "failed",
-      message: "Server Error",
+      status: 'failed',
+      message: 'Server Error',
     });
   }
 };
